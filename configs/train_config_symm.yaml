@@ -1,0 +1,36 @@
+defaults:
+  - model: small
+  - dataset: symm_dataset
+  - accelerate: default_config
+  - _self_
+
+seed: 42
+device: ${env:DEVICE,cuda}
+
+batch:
+  batch_size: 64
+  num_hard_negs: 5
+  ref_size: 768
+  use_stratified_batch_sampler: false
+  drop_last: true
+  prefetch_factor: 4
+  num_workers: 16
+
+training:
+  epochs: 2
+  lr: 1e-5
+  weight_decay: 0.01
+  temperature: 0.02
+  output_dir: saved_model
+
+wandb:
+  project: ru-en-embedder-finetune-symm
+  api_key: null #если есть ключ, ставится в os.environ, если же null, предпологается, что уже стоит в os.environ
+  use_wandb: true
+
+
+
+# чтобы Hydra не создавал вложенные папки, а сохранял в cwd:
+hydra:
+  run:
+    dir: .

@@ -1,0 +1,9 @@
+datasets
+hydra-core
+numpy
+omegaconf
+torch
+tqdm
+transformers
+wandb
+accelerate[deepspeed]
