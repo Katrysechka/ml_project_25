@@ -14,9 +14,8 @@ def train_epoch(model, train_dl, optim, scheduler, memory, scaler, cfg, epoch_id
                             total=len(train_dl)):
         optim.zero_grad()
         with amp.autocast(enabled=(cfg.device == "cuda")):
-            embs = model(**batch).last_hidden_state[:, 0, :]  # CLS
+            embs = model(**batch).last_hidden_state[:, 0, :] 
 
-        # ---------- разбор батча ----------
         stride = 2 + cfg.batch.num_hard_negs
         anchors = embs[0::stride]
         positives = embs[1::stride]
@@ -46,7 +45,7 @@ def train_epoch(model, train_dl, optim, scheduler, memory, scaler, cfg, epoch_id
         if cfg.wandb.use_wandb:
             wandb.log({"train_loss": loss.item()}, step=global_step + step)
         total_loss += loss.item()
-        memory.enqueue(batch_negs)  # в память кладём только негативы
+        memory.enqueue(batch_negs) 
     return total_loss / len(train_dl)
 
 

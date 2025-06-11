@@ -10,7 +10,6 @@ from src.implementations.stratified_batch_sampler import StratifiedBatchSampler
 
 
 def get_dataloaders(cfg, tokenizer):
-    # Загрузка датасета: либо по имени на HF Hub, либо из локальной папки
     name = cfg.dataset.get("dataset_name")
     path = cfg.dataset.get("dataset_path")
     if (name and path) or (not name and not path):
@@ -34,7 +33,7 @@ def get_dataloaders(cfg, tokenizer):
 
 
     if cfg.batch.use_stratified_batch_sampler:
-        sampler = StratifiedBatchSampler(train_ids, cfg.batch.batch_size)  # drop_last по сути всегда True
+        sampler = StratifiedBatchSampler(train_ids, cfg.batch.batch_size)  
         train_dl = DataLoader(
             train_ds,
             batch_sampler=sampler,
@@ -62,8 +61,7 @@ def get_dataloaders(cfg, tokenizer):
         pin_memory=True,
         prefetch_factor=cfg.batch.prefetch_factor,
         num_workers=cfg.batch.num_workers,
-        drop_last=cfg.batch.drop_last #ошибка с true, если тестируем с full = full.select(range(1000)) так как test_size = 0.02
-
+        drop_last=cfg.batch.drop_last 
     )
 
     return train_dl, val_dl

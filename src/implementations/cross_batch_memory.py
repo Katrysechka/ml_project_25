@@ -1,13 +1,7 @@
 import torch
 from collections import deque
 
-
 class CrossBatchMemory:
-    '''
-    очередь эмбеддингов предыдущих негативов для более стабильного InfoNCE
-    нужен большой батч, а большой батч наши видеокарты не тянут, очередь "симулирует" большой батч.
-    '''
-
     def __init__(self, max_size: int, dim: int, device: str):
         self.max_size = max_size
         self.device = device

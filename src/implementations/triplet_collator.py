@@ -2,8 +2,6 @@ from typing import List
 from transformers import PreTrainedTokenizer
 
 class TripletCollator:
-    """Преобразует batch из triplet-примеров в токены для (q, pos, negs...)."""
-
     def __init__(self, tokenizer: PreTrainedTokenizer, max_len: int):
         self.tok = tokenizer
         self.max_len = max_len
@@ -21,5 +19,4 @@ class TripletCollator:
             max_length=self.max_len,
             return_tensors="pt",
         )
-        # Отдаём на CPU, Accelerator перенесёт на GPU при prepare()
         return enc

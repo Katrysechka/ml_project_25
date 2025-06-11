@@ -16,7 +16,6 @@ from src.implementations.cross_batch_memory import CrossBatchMemory
 from src.utils.train_accelerate_utils import train_epoch_accelerate, validate_epoch_accelerate
 
 def set_seed(seed: int) -> None:
-    """Set the seed for reproducibility."""
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -35,35 +34,26 @@ def main(cfg: DictConfig):
     accelerator.state.deepspeed_plugin.deepspeed_config['train_micro_batch_size_per_gpu'] = cfg.batch.batch_size
     accelerator.state.deepspeed_plugin.deepspeed_config['gradient_accumulation_steps'] = 1
 
-    # ─── 1.1) Инициализируем трекеры (имя run, параметры эксперимента)
     if accelerator.is_main_process:
         accelerator.init_trackers(
-            project_name=cfg.wandb.project,  # уникальное имя запуска
+            project_name=cfg.wandb.project, 
             config=OmegaConf.to_container(cfg, resolve=False)
         )
 
-    # ─── 3) Строим токенизатор и модель
     tokenizer, model = build_tokenizer_and_model(cfg)
-
-    # ─── 4) Даталоадеры
     train_dl, val_dl = get_dataloaders(cfg, tokenizer)
-
-    # ─── 5) Оптимизатор и шедулер
     total_steps = cfg.training.epochs * len(train_dl)
     optim, scheduler = get_optim_and_scheduler(cfg, model, total_steps)
 
-    # ─── 6) Cross-Batch-Memory
     num_batch_negs = cfg.batch.batch_size * cfg.batch.num_hard_negs
     queue_size = max(0, cfg.batch.ref_size - 1 - num_batch_negs)
     accelerator.print(f"INFO: CrossBatchMemory queue size per process = {queue_size}")
     memory = CrossBatchMemory(int(queue_size), cfg.model.hidden_dim, accelerator.device)
 
-    # ─── 8) Готовим всё к распараллеливанию
+
     model, optim, train_dl, val_dl, scheduler = accelerator.prepare(
         model, optim, train_dl, val_dl, scheduler
     )
-
-    # 9) Цикл обучения и валидации через вынесенные функции
 
     for epoch in range(1, cfg.training.epochs + 1):
         train_loss = train_epoch_accelerate(
@@ -76,7 +66,7 @@ def main(cfg: DictConfig):
         if accelerator.is_main_process:
             print(f"Epoch {epoch}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}")
 
-    accelerator.wait_for_everyone()  # Дождаться всех процессов перед завершением
+    accelerator.wait_for_everyone() 
     if accelerator.is_main_process:
         accelerator.end_training()
 

@@ -21,7 +21,7 @@ def train_epoch_accelerate(accelerator, model, tokenizer, train_dl, optim, sched
             mask[0::stride] = mask[1::stride] = False
             batch_negs = embs[mask]
 
-            all_negs = accelerator.gather(batch_negs).detach()  # чтобы CrossBatchMemory делился  между GPU
+            all_negs = accelerator.gather(batch_negs).detach() 
             memory.enqueue(all_negs)
 
             loss = info_nce_loss(
@@ -32,7 +32,6 @@ def train_epoch_accelerate(accelerator, model, tokenizer, train_dl, optim, sched
                 cfg.training.temperature,
             )
             accelerator.backward(loss)
-            # градиент-клиппинг выполняет Deepspeed внутри себя
             optim.step()
             optim.zero_grad()
             scheduler.step()

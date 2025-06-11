@@ -8,7 +8,6 @@ def build_tokenizer_and_model(cfg):
     tokenizer = AutoTokenizer.from_pretrained(cfg.model._model_, revision=cfg.model.revision)
     model = AutoModel.from_pretrained(cfg.model._model_, revision=cfg.model.revision)
     model.gradient_checkpointing_enable()
-    # полагайемся на accelerator.prepare для размещения модели и тензоров на нужном GPU.
     return tokenizer, model
 
 
